@@ -9,17 +9,19 @@ BUFF_SIZE = 1024
 client = None
 
 def connect():
+    global client
     try:
         client = socket(AF_INET, SOCK_STREAM)
         client.connect(SOCKET)
         while True:
-            msg = client.recv(BUFF_SIZE).deccode()
+            msg = client.recv(BUFF_SIZE).decode()
             print(msg)
-            res = input('')
-            if type(res) == type(-1):
-                break
-            else:
+            if msg[0] == 'x':
+                res = input('')
                 client.send(res.encode())
+            else:
+                # user is connected
+                break
     except error as e:
         print(f'Socket Error: {e}')
 
@@ -35,7 +37,7 @@ def receive():
 def post():
     while True:
         message = input(":")
-        client.send(message.encode)
+        client.send(message.encode())
 
 
 if __name__ == "__main__":

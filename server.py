@@ -24,20 +24,22 @@ def accept():
         try:
             client, addr = server.accept()
             print(f'{addr} connected with server!')
-            while True:
-                register_user_thread = Thread(target=register_user, args=(client,))
-                register_user_thread.start()
+
+            # Handle some registration
+            register_user_thread = Thread(target=register_user, args=(client,))
+            register_user_thread.start()
+
         except error as e:
             print(f'Connection accept error: {e}')
 
 def register_user(client):
     global users
     try:
-        msg = "x Enter your username: "
+        msg = "Enter your username: "
         client.send(msg.encode())
         username = client.recv(BUFF_SIZE)
         if username in users:
-            msg = "Username not availble, try again".encode()
+            msg = "username not available, try again".encode()
             client.send(msg)
         else:
             msg = f"{username} just joined the chat!"
