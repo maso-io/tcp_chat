@@ -28,10 +28,12 @@ def register_user():
             msg = client.recv(BUFF_SIZE).decode()
             if not msg:
                 # server disconnected
-                break
+                print(f'Server disconnected during registration')
+                client.close()
+                exit(1)
             else:
-                if "Enter your username" or "username not available" in msg:
-                    print(msg)
+                if "Enter your username" in msg or "username not available" in msg:
+                    print(msg, end='')
                     username = input("")
                     client.send(username.strip().encode())
                 else:
@@ -47,10 +49,6 @@ def register_user():
         print(f'Client disconnecting from server.')
         client.close()
         exit(0)
-    finally:
-        print(f'Server disconnected')
-        client.close()
-        exit(0)
 
 def receive():
     global username
@@ -61,7 +59,7 @@ def receive():
                 # server disconnected
                 break
             else:
-                if username in message:
+                if message.startswith(f'{username}:'):
                     continue
                 print(message)
     except error as e:
@@ -74,10 +72,10 @@ def receive():
         exit(1)
 
 def post():
-    global client
+    global client, username
     try:
         while True:
-            message = input("")
+            message = input(f'')
             if not message.strip():
                 continue
             else:
@@ -95,7 +93,7 @@ if __name__ == "__main__":
             exit(1)
         # start thread to receive messages
         receive_t = Thread(target=receive)
-        #receive_t.daemon = True
+        receive_t.daemon = True
         receive_t.start()
         # start sending messages on main thread
         post()

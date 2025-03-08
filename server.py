@@ -34,21 +34,27 @@ def accept():
 
 def register_user(client):
     global users
+    attempts = 0
     try:
-        msg = "Enter your username: "
-        client.send(msg.encode())
-        username = client.recv(BUFF_SIZE)
-        if username in users:
-            msg = "username not available, try again".encode()
-            client.send(msg)
-        else:
-            msg = f"{username} just joined the chat!"
-            users[username] = client
-            receive_thread = Thread(target=receive, args=(username, client,))
-            receive_thread.start()
-            broadcast(msg)
+        while True:
+            if attempts == 0:
+                msg = "Enter your username: "
+            else:
+                msg = "username not available, try again: "
+            client.send(msg.encode())
+            username = client.recv(BUFF_SIZE).decode()
+            if username in users:
+                attempts = attempts + 1
+            else:
+                msg = f"{username} just joined the chat!"
+                users[username] = client
+                receive_thread = Thread(target=receive, args=(username, client,))
+                receive_thread.start()
+                broadcast(msg)
+                return True
     except error as e:
         print(f'Client registration error: {e}')
+        client.close()
 
 def broadcast(msg):
     for client in users.values():
